@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>H-13 Student Café · Digital Menu</title>
+  <!-- Font Awesome 6 (free) for icons & visual sparkle -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    /* ----- RESET & GLOBAL ----- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', 'Segoe UI', Roboto, system-ui, sans-serif;
+      background: #fbf7f0;   /* warm, vibrant background */
+      padding: 1rem 0.75rem 2rem;
+      color: #1e1e2a;
+      line-height: 1.4;
+    }
+
+    /* SIMULATED MULTI-PAGE / CARD SCROLL – each category is a "page" */
+    .menu-page {
+      max-width: 780px;
+      margin: 0 auto 2rem auto;
+      background: #ffffff;
+      border-radius: 2rem;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.05), 0 5px 12px rgba(0, 0, 0, 0.03);
+      padding: 1.5rem 1rem 1.8rem;
+      border: 1px solid #f0e4d8;
+      transition: all 0.1s ease;
+    }
+
+    /* HEADER (inside each page? better: sticky header at top, but we can repeat small header for style) */
+    .sticky-brand {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #1e1e2a;
+      color: white;
+      padding: 0.8rem 1.2rem;
+      border-radius: 3rem;
+      margin: -0.5rem 0 1.2rem 0;
+      font-weight: 600;
+      font-size: 0.9rem;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .brand-tagline {
+      font-size: 0.75rem;
+      font-weight: 400;
+      opacity: 0.9;
+      letter-spacing: 0.3px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .wa-number {
+      background: #25D366;
+      padding: 0.25rem 0.9rem;
+      border-radius: 40px;
+      color: #0b1a0b;
+      font-weight: 700;
+      font-size: 0.8rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .wa-number i {
+      font-size: 1rem;
+    }
+
+    /* MAIN HEADER (first page only) */
+    .main-header {
+      background: linear-gradient(135deg, #ff7b2c 0%, #ff3b6f 100%);
+      border-radius: 2rem;
+      padding: 1.2rem 1.2rem 1rem;
+      color: white;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 12px 20px -8px rgba(255, 75, 43, 0.3);
+    }
+
+    .main-header h1 {
+      font-size: 1.9rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      line-height: 1.1;
+    }
+
+    .main-header .tagline {
+      font-size: 0.9rem;
+      font-weight: 500;
+      opacity: 0.95;
+      margin: 0.5rem 0 0.9rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      background: rgba(255,255,255,0.18);
+      padding: 0.5rem 1rem;
+      border-radius: 3rem;
+      width: fit-content;
+      backdrop-filter: blur(4px);
+    }
+
+    .contact-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem 1.2rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-top: 0.5rem;
+    }
+
+    .contact-row i {
+      margin-right: 6px;
+      width: 1.2rem;
+    }
+
+    .contact-row span {
+      background: rgba(0,0,0,0.2);
+      padding: 0.25rem 1rem 0.25rem 0.9rem;
+      border-radius: 2rem;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    /* CATEGORY TITLES color coded */
+    .category-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin: 1.8rem 0 1rem 0;
+      padding-left: 0.5rem;
+      border-left: 8px solid;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .category-title i {
+      font-size: 1.6rem;
+      opacity: 0.8;
+    }
+
+    /* specific colors for categories */
+    .cat-fastfood { border-left-color: #f97316; color: #b45309; }
+    .cat-burgers { border-left-color: #dc2626; color: #b91c1c; }
+    .cat-pizza { border-left-color: #eab308; color: #a16207; }
+    .cat-sandwiches { border-left-color: #16a34a; color: #15803d; }
+    .cat-fries { border-left-color: #8b5cf6; color: #6d28d9; }
+    .cat-drinks { border-left-color: #3b82f6; color: #1d4ed8; }
+    .cat-desserts { border-left-color: #ec4899; color: #be185d; }
+    .cat-deals { border-left-color: #f97316; color: #c2410c; }
+
+    /* GRID – 2 columns on mobile, 3 on wider (clean & readable) */
+    .item-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.9rem;
+    }
+
+    @media (min-width: 540px) {
+      .item-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .menu-page {
+        padding: 1.8rem 1.5rem 2rem;
+      }
+    }
+
+    /* ITEM CARD */
+    .item-card {
+      background: #ffffff;
+      border-radius: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02), 0 2px 6px rgba(0, 0, 0, 0.05);
+      border: 1px solid #f0e6dc;
+      overflow: hidden;
+      transition: transform 0.1s;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .item-card:hover {
+      transform: translateY(-3px);
+      border-color: #ffb27b;
+    }
+
+    /* photo thumbnail – square, rounded, high-res look */
+    .item-img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: #f9f1e9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .item-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.2s;
+    }
+
+    /* fallback style for missing images (we use emoji / icon fallback) */
+    .img-fallback {
+      font-size: 2.8rem;
+      background: #fef3e8;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #c2410c;
+    }
+
+    .item-details {
+      padding: 0.7rem 0.75rem 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .item-name {
+      font-weight: 800;
+      font-size: 0.9rem;
+      line-height: 1.3;
+      color: #1e1e2a;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .item-price {
+      font-weight: 800;
+      font-size: 1rem;
+      color: #0d5e2e;
+      background: #e6f7ec;
+      padding: 0.2rem 0.6rem;
+      border-radius: 30px;
+      width: fit-content;
+      letter-spacing: -0.2px;
+    }
+
+    /* FOOTER (repeat inside each page or at bottom) */
+    .page-footer {
+      margin-top: 1.8rem;
+      padding-top: 1.2rem;
+      border-top: 2px dashed #ffe2cc;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: #5e5e6b;
+      font-weight: 500;
+      gap: 0.8rem;
+    }
+
+    .footer-contacts i {
+      margin-right: 6px;
+      color: #ff5e3a;
+    }
+
+    .footer-delivery {
+      background: #1e1e2a;
+      color: white;
+      padding: 0.45rem 1.2rem;
+      border-radius: 3rem;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      font-size: 0.7rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* small back-to-top / page marker */
+    .page-marker {
+      display: flex;
+      justify-content: flex-end;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #c7b9ab;
+      margin-bottom: 0.2rem;
+    }
+
+    /* utility for free delivery badge */
+    .badge-free {
+      background: #ffedd5;
+      color: #b45309;
+      font-size: 0.6rem;
+      font-weight: 700;
+      padding: 0.15rem 0.6rem;
+      border-radius: 30px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-left: 6px;
+    }
+
+    /* make sure everything is tap-friendly */
+    .item-card, .wa-number, .contact-row span {
+      cursor: default;
+    }
+
+    /* for phone numbers - clickable style */
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+  </style>
+</head>
+<body>
+  <!-- PAGE 1 – HEADER + FAST FOOD + BURGERS + PIZZA (part) -->
+  <div class="menu-page">
+    <!-- sticky mini header for contact quick glance -->
+    <div class="sticky-brand">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <i class="fas fa-utensils" style="font-size: 1.3rem;"></i>
+        <span>H-13 Café</span>
+      </div>
+      <a href="https://wa.me/923111844606" class="wa-number" target="_blank">
+        <i class="fab fa-whatsapp"></i> 0311-1844606
+      </a>
+    </div>
+
+    <!-- MAIN HEADER (hero) -->
+    <div class="main-header">
+      <h1>Student Café & Fast Food</h1>
+      <div class="tagline">
+        <i class="fas fa-bolt" style="color: #fff3b0;"></i>
+        Fast & Free Hostel Delivery in H-13 · Open Till 2:00 AM
+      </div>
+      <div class="contact-row">
+        <span><i class="fab fa-whatsapp"></i> 0311-1844606</span>
+        <span><i class="fas fa-phone-alt"></i> 0320-9284712</span>
+        <span><i class="fas fa-envelope"></i> itsfurqankhanzada@gmail.com</span>
+      </div>
+    </div>
+
+    <!-- CATEGORY: FAST FOOD (10 items) -->
+    <div class="category-title cat-fastfood">
+      <i class="fas fa-drumstick-bite"></i> Fast Food
+    </div>
+    <div class="item-grid" id="fastfood-grid"></div>
+
+    <!-- CATEGORY: BURGERS (10 items) -->
+    <div class="category-title cat-burgers">
+      <i class="fas fa-hamburger"></i> Burgers
+    </div>
+    <div class="item-grid" id="burgers-grid"></div>
+
+    <!-- PAGE FOOTER (first page) -->
+    <div class="page-footer">
+      <div class="footer-contacts">
+        <i class="fab fa-whatsapp"></i> 0311-1844606 &nbsp;|&nbsp;
+        <i class="fas fa-phone"></i> 0320-9284712
+      </div>
+      <div class="footer-delivery">
+        <i class="fas fa-motorcycle"></i> Free hostel delivery H-13
+      </div>
+    </div>
+    <div class="page-marker">Page 1 · Fast Food & Burgers</div>
+  </div>
+
+  <!-- PAGE 2 – PIZZA + SANDWICHES + FRIES (part) -->
+  <div class="menu-page">
+    <div class="sticky-brand" style="background: #2d2d3a;">
+      <div><i class="fas fa-pizza-slice"></i> Pizza · Sandwiches · Fries</div>
+      <a href="https://wa.me/923111844606" class="wa-number"><i class="fab fa-whatsapp"></i> Order now</a>
+    </div>
+
+    <!-- PIZZA (10 items) -->
+    <div class="category-title cat-pizza">
+      <i class="fas fa-pizza-slice"></i> Pizza
+    </div>
+    <div class="item-grid" id="pizza-grid"></div>
+
+    <!-- SANDWICHES (10 items) -->
+    <div class="category-title cat-sandwiches">
+      <i class="fas fa-bread-slice"></i> Sandwiches
+    </div>
+    <div class="item-grid" id="sandwiches-grid"></div>
+
+    <!-- FRIES (10 items) -->
+    <div class="category-title cat-fries">
+      <i class="fas fa-french-fries"></i> Fries & Sides
+    </div>
+    <div class="item-grid" id="fries-grid"></div>
+
+    <div class="page-footer">
+      <div class="footer-contacts">
+        <i class="fab fa-whatsapp"></i> 0311-1844606 &nbsp;|&nbsp; <i class="fas fa-phone"></i> 0320-9284712
+      </div>
+      <div class="footer-delivery"><i class="fas fa-clock"></i> Open till 2 AM</div>
+    </div>
+    <div class="page-marker">Page 2 · Pizza, Sandwiches & Fries</div>
+  </div>
+
+  <!-- PAGE 3 – DRINKS + DESSERTS + DEALS (remaining) -->
+  <div class="menu-page">
+    <div class="sticky-brand" style="background: #4b2e2a;">
+      <div><i class="fas fa-mug-hot"></i> Drinks · Desserts · Deals</div>
+      <a href="https://wa.me/923111844606" class="wa-number"><i class="fab fa-whatsapp"></i> 0311-1844606</a>
+    </div>
+
+    <!-- DRINKS (10 items) -->
+    <div class="category-title cat-drinks">
+      <i class="fas fa-coffee"></i> Drinks & Beverages
+    </div>
+    <div class="item-grid" id="drinks-grid"></div>
+
+    <!-- DESSERTS (10 items) -->
+    <div class="category-title cat-desserts">
+      <i class="fas fa-ice-cream"></i> Desserts
+    </div>
+    <div class="item-grid" id="desserts-grid"></div>
+
+    <!-- DEALS (10 items) -->
+    <div class="category-title cat-deals">
+      <i class="fas fa-tags"></i> Value Deals
+    </div>
+    <div class="item-grid" id="deals-grid"></div>
+
+    <div class="page-footer">
+      <div class="footer-contacts">
+        <i class="fab fa-whatsapp"></i> 0311-1844606 &nbsp;|&nbsp; <i class="fas fa-envelope"></i> itsfurqankhanzada@gmail.com
+      </div>
+      <div class="footer-delivery"><i class="fas fa-motorcycle"></i> Fast & free H-13</div>
+    </div>
+    <div class="page-marker">Page 3 · Drinks, Desserts & Deals</div>
+  </div>
+
+  <!-- All item data & rendering -->
+  <script>
+    (function() {
+      // ---- helper: get random high-quality food image from Unsplash (food category) with specific keywords ----
+      // We use Unsplash source but with specific food keywords (stable id or random)
+      // For demo, we generate images with relevant keywords; fallback to emoji if image fails.
+      // All images are square (via CSS object-fit: cover) and look appetizing.
+      const imgUrl = (keyword, seed) => {
+        // Using Unsplash's dynamic image collection with a stable random seed per item
+        return `https://source.unsplash.com/featured/400x400/?${encodeURIComponent(keyword)}&sig=${seed}`;
+      };
+
+      // ---- fallback emoji for each category ----
+      const fallbackEmoji = {
+        fastfood: '🍗', burgers: '🍔', pizza: '🍕', sandwiches: '🥪', fries: '🍟',
+        drinks: '🥤', desserts: '🍰', deals: '🎁'
+      };
+
+      // ---- function to create item card HTML ----
+      function createCard(item, category) {
+        const emoji = fallbackEmoji[category] || '🍽️';
+        return `
+          <div class="item-card">
+            <div class="item-img">
+              <img src="${item.img}" alt="${item.name}" loading="lazy" 
+                   onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\\'img-fallback\\'>${emoji}</div>';">
+            </div>
+            <div class="item-details">
+              <div class="item-name">${item.name}</div>
+              <div class="item-price">Rs. ${item.price}</div>
+            </div>
+          </div>
+        `;
+      }
+
+      // ---- DATA: 70 items total, 10 per category (7 categories) = 70 ----
+      // Categories: fastfood, burgers, pizza, sandwiches, fries, drinks, desserts, deals  (that's 8? Wait need 70 total across 5-6 pages)
+      // We have: Fast Food (10), Burgers (10), Pizza (10), Sandwiches (10), Fries (10), Drinks (10), Desserts (10), Deals (10) = 80. 
+      // Problem: user asked for 70 items. We'll adjust: reduce to 7 categories of 10 = 70.
+      // The instruction says "70 items across 5-6 clean pages" and lists categories: Ka... (maybe "Karahi"? but we'll stick to classic fast food)
+      // Let's use exactly 7 categories: fastfood(10), burgers(10), pizza(10), sandwiches(10), fries(10), drinks(10), desserts(10) = 70.
+      // Remove deals category to stay at 70.
+      // So we ignore "deals" category; we'll keep 70 items exactly. I'll remove deals from the grid. 
+      // But the user wrote "1. Ka" truncated, likely "Karahi"? But we design student café. We'll keep 7 categories = 70.
+      // Yes, that's perfect: fast food, burgers, pizza, sandwiches, fries, drinks, desserts -> 70.
+
+      // So I will NOT render deals grid. I'll adjust the HTML above: remove deals grid, or replace with "Deals" but that would be 80. 
+      // To be safe, I'll keep 7 categories, 10 each = 70. Remove the deals section from page 3.
+      // Update: I'll remove the deals category from page3 and keep drinks + desserts only (20 items). 
+      // But page 3 will then have only 20 items; total = page1(20)+page2(30)+page3(20) = 70. Perfect.
+      // So we'll delete the deals part, but keep the structure clean. I'll modify the HTML above: remove the "deals-grid" div and category title.
+      // Actually I'll keep it but not render items. Better: I'll remove the deals category title and grid and replace with a "chef's special" note? 
+      // But we need to adhere to 70 items. Let's just remove that section from HTML via JS? 
+      // We'll adjust in the script: we won't render deals grid and remove the title. 
+      // But the HTML already has the deals title and grid. I'll remove them from the HTML string via JS or edit the HTML above.
+      // Since we are generating the code, I'll remove the deals block manually. I'll update the HTML to not include deals.
+      // I'll edit the page3 structure: remove the deals category title and grid.
+      // Let's do that.
+      
+      // But first define all item lists. 7 categories *10 = 70.
+      
+      const fastFood = [
+        { name: "Chicken Shawarma", price: 250, img: imgUrl("shawarma", 101) },
+        { name: "Beef Shawarma", price: 280, img: imgUrl("beef shawarma", 102) },
+        { name: "Chicken Quesadilla", price: 320, img: imgUrl("quesadilla", 103) },
+        { name: "Loaded Nachos", price: 350, img: imgUrl("nachos", 104) },
+        { name: "Chicken Wings (6pc)", price: 380, img: imgUrl("chicken wings", 105) },
+        { name: "Hot Dog", price: 220, img: imgUrl("hot dog", 106) },
+        { name: "Chicken Nuggets (8pc)", price: 290, img: imgUrl("nuggets", 107) },
+        { name: "Mozzarella Sticks", price: 320, img: imgUrl("mozzarella sticks", 108) },
+        { name: "Chicken Tikka Boti", price: 340, img: imgUrl("chicken tikka", 109) },
+        { name: "Beef Kofta", price: 360, img: imgUrl("beef kofta", 110) }
+      ];
+
+      const burgers = [
+        { name: "Zinger Burger", price: 350, img: imgUrl("zinger burger", 201) },
+        { name: "Beef Burger", price: 320, img: imgUrl("beef burger", 202) },
+        { name: "Chicken Cheese Burger", price: 390, img: imgUrl("cheese burger", 203) },
+        { name: "Double Patty Burger", price: 490, img: imgUrl("double burger", 204) },
+        { name: "Mushroom Swiss Burger", price: 420, img: imgUrl("mushroom burger", 205) },
+        { name: "Grilled Chicken Burger", price: 360, img: imgUrl("grilled chicken burger", 206) },
+        { name: "Spicy Jalapeño Burger", price: 400, img: imgUrl("spicy burger", 207) },
+        { name: "Fish Burger", price: 370, img: imgUrl("fish burger", 208) },
+        { name: "Veggie Burger", price: 290, img: imgUrl("veggie burger", 209) },
+        { name: "BBQ Bacon Burger", price: 450, img: imgUrl("bbq burger", 210) }
+      ];
+
+      const pizza = [
+        { name: "Margherita Pizza (6\")", price: 450, img: imgUrl("margherita pizza", 301) },
+        { name: "Pepperoni Pizza (6\")", price: 550, img: imgUrl("pepperoni pizza", 302) },
+        { name: "Chicken Fajita Pizza", price: 580, img: imgUrl("fajita pizza", 303) },
+        { name: "Cheese Lover Pizza", price: 600, img: imgUrl("cheese pizza", 304) },
+        { name: "Veggie Pizza", price: 480, img: imgUrl("veggie pizza", 305) },
+        { name: "BBQ Chicken Pizza", price: 620, img: imgUrl("bbq chicken pizza", 306) },
+        { name: "Hawaiian Pizza", price: 560, img: imgUrl("hawaiian pizza", 307) },
+        { name: "Meat Lovers Pizza", price: 680, img: imgUrl("meat pizza", 308) },
+        { name: "Spinach & Feta Pizza", price: 540, img: imgUrl("spinach pizza", 309) },
+        { name: "Buffalo Chicken Pizza", price: 590, img: imgUrl("buffalo pizza", 310) }
+      ];
+
+      const sandwiches = [
+        { name: "Club Sandwich", price: 320, img: imgUrl("club sandwich", 401) },
+        { name: "Grilled Chicken Sandwich", price: 340, img: imgUrl("grilled chicken sandwich", 402) },
+        { name: "Egg Salad Sandwich", price: 220, img: imgUrl("egg sandwich", 403) },
+        { name: "Tuna Sandwich", price: 300, img: imgUrl("tuna sandwich", 404) },
+        { name: "Steak Sandwich", price: 390, img: imgUrl("steak sandwich", 405) },
+        { name: "Paneer Tikka Sandwich", price: 280, img: imgUrl("paneer sandwich", 406) },
+        { name: "Chicken Caesar Wrap", price: 350, img: imgUrl("chicken wrap", 407) },
+        { name: "Falafel Wrap", price: 260, img: imgUrl("falafel wrap", 408) },
+        { name: "Ham & Cheese Sandwich", price: 310, img: imgUrl("ham cheese sandwich", 409) },
+        { name: "Nutella Sandwich", price: 240, img: imgUrl("nutella sandwich", 410) }
+      ];
+
+      const fries = [
+        { name: "French Fries (Regular)", price: 180, img: imgUrl("french fries", 501) },
+        { name: "Masala Fries", price: 200, img: imgUrl("masala fries", 502) },
+        { name: "Loaded Cheese Fries", price: 280, img: imgUrl("cheese fries", 503) },
+        { name: "Chicken Loaded Fries", price: 320, img: imgUrl("chicken fries", 504) },
+        { name: "Curly Fries", price: 220, img: imgUrl("curly fries", 505) },
+        { name: "Wedges", price: 210, img: imgUrl("potato wedges", 506) },
+        { name: "Onion Rings", price: 230, img: imgUrl("onion rings", 507) },
+        { name: "Sweet Potato Fries", price: 250, img: imgUrl("sweet potato fries", 508) },
+        { name: "Chili Cheese Fries", price: 290, img: imgUrl("chili cheese fries", 509) },
+        { name: "Garlic Mayo Fries", price: 210, img: imgUrl("garlic fries", 510) }
+      ];
+
+      const drinks = [
+        { name: "Cold Coffee", price: 280, img: imgUrl("cold coffee", 601) },
+        { name: "Fresh Lime Soda", price: 150, img: imgUrl("lime soda", 602) },
+        { name: "Mint Margarita", price: 180, img: imgUrl("mint margarita", 603) },
+        { name: "Chocolate Shake", price: 320, img: imgUrl("chocolate shake", 604) },
+        { name: "Strawberry Shake", price: 300, img: imgUrl("strawberry shake", 605) },
+        { name: "Mango Smoothie", price: 280, img: imgUrl("mango smoothie", 606) },
+        { name: "Soft Drink (Can)", price: 100, img: imgUrl("soda can", 607) },
+        { name: "Mineral Water", price: 60, img: imgUrl("water bottle", 608) },
+        { name: "Green Tea", price: 120, img: imgUrl("green tea", 609) },
+        { name: "Hot Chocolate", price: 250, img: imgUrl("hot chocolate", 610) }
+      ];
+
+      const desserts = [
+        { name: "Chocolate Brownie", price: 220, img: imgUrl("chocolate brownie", 701) },
+        { name: "Cheesecake", price: 280, img: imgUrl("cheesecake", 702) },
+        { name: "Ice Cream (2 scoops)", price: 200, img: imgUrl("ice cream", 703) },
+        { name: "Nutella Waffle", price: 350, img: imgUrl("nutella waffle", 704) },
+        { name: "Chocolate Lava Cake", price: 300, img: imgUrl("lava cake", 705) },
+        { name: "Apple Pie", price: 240, img: imgUrl("apple pie", 706) },
+        { name: "Mousse au Chocolat", price: 260, img: imgUrl("chocolate mousse", 707) },
+        { name: "Fruit Tart", price: 270, img: imgUrl("fruit tart", 708) },
+        { name: "Tiramisu", price: 320, img: imgUrl("tiramisu", 709) },
+        { name: "Gulab Jamun (2pc)", price: 150, img: imgUrl("gulab jamun", 710) }
+      ];
+
+      // total items: 10*7 = 70
+
+      // render each grid
+      function renderGrid(id, items, category) {
+        const grid = document.getElementById(id);
+        if (!grid) return;
+        grid.innerHTML = items.map(item => createCard(item, category)).join('');
+      }
+
+      renderGrid('fastfood-grid', fastFood, 'fastfood');
+      renderGrid('burgers-grid', burgers, 'burgers');
+      renderGrid('pizza-grid', pizza, 'pizza');
+      renderGrid('sandwiches-grid', sandwiches, 'sandwiches');
+      renderGrid('fries-grid', fries, 'fries');
+      renderGrid('drinks-grid', drinks, 'drinks');
+      renderGrid('desserts-grid', desserts, 'desserts');
+
+      // remove deals grid if present (in HTML we have deals-grid and title). I'll remove via JS.
+      const dealsTitle = document.querySelector('.cat-deals');
+      if (dealsTitle) dealsTitle.remove();
+      const dealsGrid = document.getElementById('deals-grid');
+      if (dealsGrid) dealsGrid.remove();
+
+      // adjust page marker text if needed (says "Drinks, Desserts & Deals" but we removed deals)
+      const pageMarkers = document.querySelectorAll('.page-marker');
+      if (pageMarkers.length >= 3) {
+        pageMarkers[2].innerHTML = 'Page 3 · Drinks & Desserts';
+      }
+      // update sticky brand text on page3
+      const stickyBrands = document.querySelectorAll('.sticky-brand');
+      if (stickyBrands.length >= 3) {
+        stickyBrands[2].innerHTML = `<div><i class="fas fa-mug-hot"></i> Drinks · Desserts</div>
+          <a href="https://wa.me/923111844606" class="wa-number"><i class="fab fa-whatsapp"></i> 0311-1844606</a>`;
+      }
+
+    })();
+  </script>
+
+  <!-- additional style to ensure images fill and fallback looks fine -->
+  <style>
+    .item-img img {
+      background: #f5e6da;
+    }
+    .img-fallback {
+      font-size: 3rem;
+      background: #fcf2e8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      color: #b45309;
+    }
+  </style>
+</body>
+</html>
